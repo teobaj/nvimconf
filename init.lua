@@ -1,3 +1,5 @@
+--General Config 
+
 vim.cmd([[
 set nocompatible
 set relativenumber
@@ -16,52 +18,91 @@ set showmatch
 set noswapfile
 set incsearch
 set scrolloff=8
-set colorcolumn=80
+set colorcolumn=120
 set undofile
-nmap ss :split<Return><C-w>w
-nmap sv :vsplit<Return><C-w>w
-nmap sj <C-w>j 
-nmap sk <C-w>k 
-nmap sh <C-w>h 
-nmap sl <C-w>l 
-nmap fe :Ex <CR>
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
 nnoremap <C-d> <C-d>zz
 nnoremap <C-u> <C-u>zz
+set clipboard=unnamedplus
 ]])
 
-local Plug = vim.fn['plug#']
-vim.call('plug#begin')
--- Plug 'kien/ctrlp.vim'
-Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-telescope/telescope.nvim' 
-Plug 'nvim-lualine/lualine.nvim'
-Plug 'nvim-tree/nvim-web-devicons'
-Plug('catppuccin/nvim', { as = 'catppuccin' })
-Plug('iamcco/markdown-preview.nvim', { ['do'] = 'cd app && npx --yes yarn install' })
-Plug 'neovim/nvim-lspconfig'
-Plug 'hrsh7th/cmp-nvim-lsp'
-Plug 'hrsh7th/cmp-buffer'
-Plug 'hrsh7th/cmp-path'
-Plug 'hrsh7th/cmp-cmdline'
-Plug 'hrsh7th/nvim-cmp'
-Plug 'hrsh7th/cmp-vsnip'
-Plug 'hrsh7th/vim-vsnip'
-Plug 'jose-elias-alvarez/null-ls.nvim'
-Plug 'MunifTanjim/prettier.nvim'
-Plug 'Equilibris/nx.nvim'
-vim.call('plug#end')
+-- Keybindings
+vim.keymap.set('n', 'ss', ':split<Return><C-w>w')
+vim.keymap.set('n', 'sv', ':vsplit<Return><C-w>w')
+vim.keymap.set('n', 'sj', '<C-w>j')
+vim.keymap.set('n', 'sk', '<C-w>k')
+vim.keymap.set('n', 'sh', '<C-w>h')
+vim.keymap.set('n', 'sl', '<C-w>l')
+vim.keymap.set('n', 's.', '5<C-w>>')
+vim.keymap.set('n', 's,', '5<C-w><')
+vim.keymap.set('n', 'fe', ':Ex <CR>')
 
--- Telescope 
+-- Telescope Keybindings
+
+
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+
+require("lazy").setup({
+  'BurntSushi/ripgrep',
+  'nvim-telescope/telescope-fzf-native.nvim',
+  'neovim/nvim-lspconfig',
+  'nvim-lua/plenary.nvim',
+  'nvim-treesitter/nvim-treesitter',  
+  'nvim-telescope/telescope.nvim',
+  'nvim-lualine/lualine.nvim',
+  'nvim-tree/nvim-web-devicons',
+  'hrsh7th/cmp-nvim-lsp',
+  'hrsh7th/cmp-buffer',
+  'hrsh7th/cmp-path',
+  'hrsh7th/cmp-cmdline',
+  'hrsh7th/nvim-cmp',
+  'hrsh7th/cmp-vsnip',
+  'hrsh7th/vim-vsnip',
+  'jose-elias-alvarez/null-ls.nvim',
+  'MunifTanjim/prettier.nvim',
+  'Equilibris/nx.nvim',
+  'othree/html5.vim',
+  'pangloss/vim-javascript',
+  {'evanleck/vim-svelte', branch = 'main'},
+  'akinsho/toggleterm.nvim',
+  'tpope/vim-fugitive',
+  'rbong/vim-flog',
+  'williamboman/mason.nvim',
+  'arzg/vim-colors-xcode',
+  'nvim-lualine/lualine.nvim',
+  { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+  {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    build = "cd app && yarn install",
+    init = function()
+      vim.g.mkdp_filetypes = { "markdown" }
+    end,
+    ft = { "markdown" },
+  },
+  { "mistricky/codesnap.nvim", build = "make" },
+})
+
+-- Telescope
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<C-p>', builtin.find_files, {
 })
 vim.keymap.set('n', '<C-b>', builtin.buffers, {})
 vim.keymap.set('n', '<C-/>', builtin.live_grep, {})
-
 vim.keymap.set('n', '<leader>fh', builtin.help_tags, {})
-
 
 -- CTRLP
 vim.cmd("set wildignore+=*/tmp/*,*.so,*.swp,*.zip")  
@@ -69,14 +110,12 @@ vim.cmd("let g:ctrlp_custom_ignore = {'dir': 'node_modules'}")
 -- LSP
 
 local lspconfig = require('lspconfig')
--- Setup
 
--- Keybinds
+-- Code actions
 vim.keymap.set('n', '<space>e', vim.diagnostic.open_float)
 vim.keymap.set('n', '<space>h', vim.diagnostic.goto_prev)
 vim.keymap.set('n', '<space>l', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist)
-
 
 vim.api.nvim_create_autocmd('LspAttach', {
   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
@@ -102,13 +141,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
-vim.cmd.colorscheme "catppuccin"
-
--- LuaLine
-require('lualine').setup()
-
-
--- CMP 
+-- Cant remember what is this
 local cmp = require('cmp')
 
 cmp.setup({
@@ -170,26 +203,36 @@ cmp.setup.cmdline(':', {
   })
 })
 
--- Set up lspconfig.
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
--- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
+
+-- LSPs
+
 lspconfig.tsserver.setup {
   capabilities = capabilities
 }
 
 lspconfig.svelte.setup {
-  capabilities = capabilities
+  capabilities = capabilities,
+  filetype = { 'svelte' }
 }
 lspconfig.cssls.setup{
-  capabilities = capabilities
+  capabilities = capabilities,
+  filetype = { 'css', 'scss', 'sass', 'pcss' }
 }
 
 lspconfig.html.setup{
   capabilities = capabilities
 }
 
+lspconfig.tailwindcss.setup{
+  capabilities = capabilities
+}
 
 
+lspconfig.gopls.setup{
+  capabilities = capabilities
+}
+
+-- Angular LSP
 local project_library_path = "/Users/TB19970/.nvm/versions/node/v18.17.1/lib/node_modules/@angular/language-server"
 local cmd = {"ngserver", "--stdio", "--tsProbeLocations","/Users/TB19970/.nvm/versions/node/v18.17.1/lib/node_modules/@angular/language-server", "--ngProbeLocations", "/Users/TB19970/.nvm/versions/node/v18.17.1/lib/node_modules/@angular/language-server" }
 
@@ -222,4 +265,68 @@ null_ls.setup({
       end, { buffer = bufnr, desc = "[lsp] format" })
     end
   end,
+})
+
+-- toggleterm
+require("toggleterm").setup({
+  direction = 'float',
+})
+
+
+ToggleTerminal  = require('toggleterm.terminal').Terminal
+
+terminal = nil
+function openTerminal() 
+  if terminal == nil then
+    terminal = ToggleTerminal:new({})
+  end
+  terminal:toggle()
+end
+
+function killTerminal()
+  terminal = nil
+end
+
+vim.keymap.set('n', 'T', openTerminal)
+vim.keymap.set('n', '<C-T>', killTerminal)
+
+function _G.set_terminal_keymaps()
+  local opts = {buffer = 0}
+  vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+end
+
+-- if you only want these mappings for toggle term use term://*toggleterm#* instead
+vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
+
+-- LuaLine
+require('lualine').setup {
+}
+
+vim.cmd.colorscheme "catppuccin"
+-- Mason
+require("mason").setup()
+
+--Treesitter
+
+require'nvim-treesitter.configs'.setup {
+  -- A list of parser names, or "all" (the five listed parsers should always be installed)
+  -- Install parsers synchronously (only applied to `ensure_installed`)
+  sync_install = true,
+
+  -- Automatically install missing parsers when entering buffer
+  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+  auto_install = true,
+
+  ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
+  -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
+
+  highlight = {
+    enable = true,
+
+  },
+}
+
+require("codesnap").setup({
+  bg_padding = 0,
+  has_breadcrumbs = true
 })
